@@ -7,7 +7,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { OAuthService } from './oauth-service';
 import { provideOAuthClient } from './provider';
-import { MemoryStorage, OAuthLogger, OAuthStorage } from './types';
+import { MemoryStorage, OAuthLogger, OAuthStorage, ParsedIdToken } from './types';
 
 const silentLogger: OAuthLogger = {
   debug: () => undefined,
@@ -173,9 +173,9 @@ describe('OAuthService', () => {
 
     it('does not save an ID token processed after logout', async () => {
       service.oidc = true;
-      let resolveIdToken: (token: any) => void;
+      let resolveIdToken!: (token: ParsedIdToken) => void;
       spyOn(service, 'processIdToken').and.returnValue(
-        new Promise((resolve) => {
+        new Promise<ParsedIdToken>((resolve) => {
           resolveIdToken = resolve;
         })
       );
@@ -189,7 +189,7 @@ describe('OAuthService', () => {
       });
 
       service.logOut(true);
-      resolveIdToken!({});
+      resolveIdToken({} as ParsedIdToken);
 
       await expectAsync(pending).toBeRejectedWithError(
         'Token refresh canceled after logout'
